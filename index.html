@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bullwhip Run</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Barlow:wght@400;600&display=swap">
+<style>
+/* Layout: one card at a time, centered, phone-first. Big type, big buttons, one decision per screen. */
+:root{
+  --bg:#eaeef2; --panel:#ffffff; --panel2:#f2f4f7; --fg:#182130; --muted:#5f6b7c; --line:#cdd5de;
+  --accent:#e8641b; --accent-fg:#ffffff; --good:#1f8f5f; --warn:#c98f00; --bad:#c93b3b;
+  --c-you:#2f6fd0; --c-whl:#15938b; --c-dis:#7c4fd9; --c-fac:#e8641b;
+  --display:"Barlow Condensed","Arial Narrow",Impact,sans-serif; --body:"Barlow","Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#151a22; --panel:#1f2630; --panel2:#2a323e; --fg:#eef2f6; --muted:#9aa6b5; --line:#3a4453;
+  --accent:#ff7a2e; --accent-fg:#1a1208; --good:#3cc98a; --warn:#f0b429; --bad:#ff6b6b;
+  --c-you:#6a9bea; --c-whl:#3dc9bf; --c-dis:#a98bf0; --c-fac:#ff7a2e; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#151a22; --panel:#1f2630; --panel2:#2a323e; --fg:#eef2f6; --muted:#9aa6b5; --line:#3a4453;
+  --accent:#ff7a2e; --accent-fg:#1a1208; --good:#3cc98a; --warn:#f0b429; --bad:#ff6b6b;
+  --c-you:#6a9bea; --c-whl:#3dc9bf; --c-dis:#a98bf0; --c-fac:#ff7a2e; color-scheme:dark }
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px}
+h1,h2,h3{font-family:var(--display);line-height:1.02;margin:0;text-wrap:balance}
+h1{font-size:clamp(40px,9vw,64px);font-weight:800}
+h2{font-size:clamp(26px,6vw,36px);font-weight:800}
+h3{font-size:20px;font-weight:700}
+p{margin:0}
+.eyebrow{font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--accent)}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+.card{max-width:580px;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:16px;animation:slide .35s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes slide{from{transform:translateY(18px);opacity:0}to{transform:none;opacity:1}}
+button{font-family:var(--display);font-size:19px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;border:0;border-radius:10px;padding:14px 22px;cursor:pointer;color:var(--fg);background:var(--panel2);transition:transform .12s,filter .12s}
+button:hover{filter:brightness(.95)} button:active{transform:translateY(1px)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);color:var(--accent-fg)}
+button.ghost{background:transparent;border:1px solid var(--line)}
+button:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.spread{justify-content:space-between}
+label{display:flex;flex-direction:column;gap:5px;font-weight:600;font-size:15px}
+input[type=text]{font:inherit;font-size:17px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--fg);min-width:0}
+input.bad{border-color:var(--bad)}
+.err{color:var(--bad);font-size:15px;min-height:22px;font-weight:600}
+.logo{width:48px;height:48px;border-radius:11px;background:var(--accent);display:grid;place-items:center;flex:none}
+.logo svg{width:30px;height:30px}
+.dots{display:flex;gap:6px}
+.dots span{flex:1;height:7px;border-radius:4px;background:var(--line)}
+.dots span.on{background:var(--accent)}
+.dots span.good{background:var(--good)} .dots span.meh{background:var(--warn)} .dots span.badd{background:var(--bad)}
+
+/* Scene */
+.scene{background:var(--panel2);border-radius:12px;padding:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center}
+.scene div{display:flex;flex-direction:column;gap:2px}
+.scene .k{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.scene .v{font-family:var(--display);font-size:40px;font-weight:800;line-height:1}
+.story{font-size:18px;max-width:52ch}
+.story b{color:var(--accent)}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{text-align:left;text-transform:none;letter-spacing:0;font-family:var(--body);font-weight:600;font-size:17px;border:2px solid var(--line);background:var(--panel2);padding:14px 16px;display:flex;gap:12px;align-items:center}
+.opt .big{font-family:var(--display);font-size:30px;font-weight:800;color:var(--accent);min-width:58px;text-align:center;flex:none}
+.opt.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 14%,var(--panel2))}
+.opt.meh{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 16%,var(--panel2))}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 14%,var(--panel2))}
+.opt:disabled{opacity:1;cursor:default}
+.opt:disabled:not(.right):not(.meh):not(.wrong){opacity:.45}
+
+/* Whip visual */
+.whip{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-items:end;height:150px;padding-top:28px}
+.whip .t{display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;position:relative}
+.whip .b{width:70%;max-width:64px;height:8%;border-radius:8px 8px 3px 3px;transition:height .6s cubic-bezier(.2,.8,.2,1.2)}
+.whip .n{font-family:var(--display);font-size:22px;font-weight:800;line-height:1}
+.whip .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.verdict{border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;animation:slide .35s}
+.verdict.right{background:color-mix(in srgb,var(--good) 14%,var(--panel2));border-left:5px solid var(--good)}
+.verdict.meh{background:color-mix(in srgb,var(--warn) 16%,var(--panel2));border-left:5px solid var(--warn)}
+.verdict.wrong{background:color-mix(in srgb,var(--bad) 14%,var(--panel2));border-left:5px solid var(--bad)}
+.verdict h3{font-size:24px}
+.pts{font-family:var(--display);font-size:22px;font-weight:800}
+.rule{background:var(--panel2);border-radius:10px;padding:10px 14px;font-size:15px}
+.rule b{color:var(--accent)}
+
+/* Score */
+.score{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.stat{background:var(--panel2);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:2px}
+.stat .k{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.stat .v{font-family:var(--display);font-size:42px;font-weight:800;line-height:1}
+.stat.total{background:var(--accent);color:var(--accent-fg)} .stat.total .k{color:var(--accent-fg);opacity:.85}
+.grade{font-family:var(--display);font-size:clamp(60px,18vw,110px);font-weight:800;line-height:1;text-align:center;color:var(--accent);animation:pop .6s cubic-bezier(.2,.9,.3,1.4)}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+textarea{font:14px/1.4 ui-monospace,Menlo,Consolas,monospace;width:100%;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--fg);padding:10px;min-height:80px}
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:600;z-index:60;animation:slide .3s}
+.intro-list{display:flex;flex-direction:column;gap:10px}
+.intro-list div{display:flex;gap:12px;align-items:flex-start}
+.intro-list .ic{width:40px;height:40px;border-radius:10px;flex:none;display:grid;place-items:center;font-family:var(--display);font-size:22px;font-weight:800;color:#fff}
+@keyframes wave{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.35)}}
+.demo .b{transform-origin:bottom;animation:wave 1.6s ease-in-out infinite}
+.demo .t:nth-child(2) .b{animation-delay:.2s}.demo .t:nth-child(3) .b{animation-delay:.4s}.demo .t:nth-child(4) .b{animation-delay:.6s}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<section id="s-login" class="card">
+  <div class="row"><div class="logo"><svg viewBox="0 0 28 28" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20c4-1 5-8 9-8s4 10 8 10 3-14 5-14"/></svg></div><div><p class="eyebrow">Supply chain game</p><h1>Bullwhip Run</h1></div></div>
+  <p class="story">You run a store. Five quick decisions. Don't crack the whip.</p>
+  <form id="login-form" novalidate style="display:flex;flex-direction:column;gap:10px">
+    <label>Username <input type="text" id="f-user" autocomplete="username" maxlength="40"></label>
+    <label>First name <input type="text" id="f-first" autocomplete="given-name" maxlength="40"></label>
+    <label>Last name <input type="text" id="f-last" autocomplete="family-name" maxlength="40"></label>
+    <div class="err" id="login-err" aria-live="polite"></div>
+    <button class="primary" type="submit">Let's go</button>
+  </form>
+</section>
+
+<!-- INTRO -->
+<section id="s-intro" class="card" hidden>
+  <p class="eyebrow">30-second briefing</p>
+  <h2>The bullwhip effect</h2>
+  <div class="whip demo" aria-hidden="true">
+    <div class="t"><span class="n" style="color:var(--c-you)">10</span><div class="b" style="height:20%;background:var(--c-you)"></div><span class="l">Your store</span></div>
+    <div class="t"><span class="n" style="color:var(--c-whl)">18</span><div class="b" style="height:36%;background:var(--c-whl)"></div><span class="l">Wholesaler</span></div>
+    <div class="t"><span class="n" style="color:var(--c-dis)">32</span><div class="b" style="height:64%;background:var(--c-dis)"></div><span class="l">Distributor</span></div>
+    <div class="t"><span class="n" style="color:var(--c-fac)">55</span><div class="b" style="height:100%;background:var(--c-fac)"></div><span class="l">Factory</span></div>
+  </div>
+  <div class="intro-list">
+    <div><span class="ic" style="background:var(--c-you)">1</span><p>Customers buy about <b>10 drinks a week</b> from your store. You order from a wholesaler, who orders from a distributor, who orders from the factory.</p></div>
+    <div><span class="ic" style="background:var(--c-dis)">2</span><p>Every time a store <b>overreacts</b>, the stage above overreacts <b>even more</b>. A tiny wobble at your store becomes a huge swing at the factory. That's the bullwhip.</p></div>
+    <div><span class="ic" style="background:var(--c-fac)">3</span><p>Each round: read the situation, tap one choice. <b>Calm, honest, demand-based orders</b> win. 20 points a round, 100 total. Then 5 extra-credit quiz points.</p></div>
+  </div>
+  <button class="primary" id="btn-play">Play</button>
+</section>
+
+<!-- ROUND -->
+<section id="s-round" class="card" hidden>
+  <div class="row spread"><p class="eyebrow">Round <span id="r-n">1</span> of 5 · <span id="r-topic"></span></p><span class="pts num" id="r-score">0 pts</span></div>
+  <div class="dots" id="r-dots"><span></span><span></span><span></span><span></span><span></span></div>
+  <h2 id="r-title"></h2>
+  <div class="scene" id="r-scene"></div>
+  <p class="story" id="r-story"></p>
+  <div class="opts" id="r-opts"></div>
+  <div id="r-result" hidden style="display:flex;flex-direction:column;gap:12px">
+    <div class="whip" id="r-whip"></div>
+    <div class="verdict" id="r-verdict"></div>
+    <div class="rule" id="r-rule"></div>
+    <button class="primary" id="r-next">Next round</button>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section id="s-quiz" class="card" hidden>
+  <div class="row spread"><p class="eyebrow">Extra credit · question <span id="q-n">1</span> of 5</p><span class="pts num" id="q-score">+0</span></div>
+  <div class="dots" id="q-dots"><span></span><span></span><span></span><span></span><span></span></div>
+  <h3 id="q-text"></h3>
+  <div class="opts" id="q-opts"></div>
+  <div class="rule" id="q-explain" hidden></div>
+  <button class="primary" id="q-next" disabled>Next</button>
+</section>
+
+<!-- RESULT -->
+<section id="s-result" class="card" hidden>
+  <p class="eyebrow">Done</p>
+  <h2 id="res-title"></h2>
+  <div class="grade num" id="res-grade"></div>
+  <div class="score">
+    <div class="stat"><span class="k">Game score</span><span class="v num" id="res-game"></span><span class="muted" style="font-size:13px">out of 100</span></div>
+    <div class="stat"><span class="k">Extra credit</span><span class="v num" id="res-quiz"></span><span class="muted" style="font-size:13px">out of 5</span></div>
+    <div class="stat total"><span class="k">Final score</span><span class="v num" id="res-total"></span></div>
+  </div>
+  <p class="story" id="res-msg"></p>
+  <div class="row"><button class="primary" id="btn-csv">Download CSV</button><button class="ghost" id="btn-again">Play again</button></div>
+  <div id="csv-fallback" hidden style="display:flex;flex-direction:column;gap:6px"><p class="muted" style="font-size:14px">Saving isn't available in this view. Copy this text into a file named <b>bullwhip_scores.csv</b>.</p><textarea id="csv-text" readonly></textarea><button class="ghost" id="btn-copy">Copy text</button></div>
+</section>
+
+<script>
+const $=id=>document.getElementById(id);
+const G={user:{},round:0,gameScore:0,results:[],quiz:{i:0,correct:0,done:false}};
+function show(name){for(const s of["login","intro","round","quiz","result"])$("s-"+s).hidden=s!==name;window.scrollTo({top:0});}
+function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2200);}
+
+/* ---- Rounds: each one is a concept the student applies ---- */
+// amp = how much each upstream stage multiplies your order. good: ~1.1, meh: ~1.5, bad: ~2.1
+const ROUNDS=[
+ {topic:"Forecasting",title:"A hot weekend",
+  scene:[["Sold this week",16],["On your shelf",14],["Arriving next week",10]],
+  story:"It was 95° on Saturday and you sold <b>16</b> drinks instead of your usual 10. The forecast for next week: back to normal.",
+  opts:[
+   {big:"11",text:"Order about what you usually sell, maybe one extra",grade:"right",amp:1.1,why:"One hot weekend is not a new trend. You kept your order steady, so the stages above you saw almost no change."},
+   {big:"16",text:"Order 16: that's what sold, so that's the new demand",grade:"meh",amp:1.5,why:"You treated a one-off spike as the new normal. The wholesaler now thinks demand is up and orders even more."},
+   {big:"30",text:"Order 30 to be safe. Summer is coming!",grade:"wrong",amp:2.1,why:"Tripling your order on one week's data sends a shockwave up the chain. The factory now sees a huge, fake demand surge."}],
+  rule:"<b>Demand signal processing:</b> every stage forecasts from the orders it receives. Overreact to one data point and the whole chain overreacts with you."},
+ {topic:"Lead time",title:"The truck is late",
+  scene:[["Sold this week",10],["On your shelf",6],["Arriving next week",20]],
+  story:"Last week's delivery got stuck in traffic. It didn't arrive, so your shelf is low. The wholesaler says both trucks (last week's and this week's) arrive <b>next week</b>.",
+  opts:[
+   {big:"10",text:"Order 10. The missing stock is already on its way",grade:"right",amp:1.1,why:"You counted the stock in the pipeline. 20 units are coming, so you only need your normal 10 on top."},
+   {big:"20",text:"Order 20 to cover the gap",grade:"meh",amp:1.5,why:"You replaced stock that is still arriving. Next week you'll be swimming in drinks, and the wholesaler saw a demand jump that never happened."},
+   {big:"40",text:"Order 40. Late trucks mean this supplier can't be trusted",grade:"wrong",amp:2.1,why:"Doubling and tripling orders because a delivery was late is exactly how panic spreads upstream. You'll get 60 units next week for 10 customers."}],
+  rule:"<b>Lead times:</b> stock you ordered is still coming. Count it before ordering more, or long delays turn into double orders."},
+ {topic:"Batching",title:"The bulk deal",
+  scene:[["Sold this week",10],["On your shelf",20],["Arriving next week",10]],
+  story:"Your wholesaler emails: <b>“Order 60 at once and get 10% off!”</b> Normal week otherwise. Your back room fits about 30.",
+  opts:[
+   {big:"10",text:"Order the usual 10. Skip the deal",grade:"right",amp:1.1,why:"Small, regular orders keep the signal smooth. The 10% discount would be eaten by storage, spoilage, and months of no orders afterward."},
+   {big:"30",text:"Order 30, a smaller stock-up",grade:"meh",amp:1.5,why:"Even a medium batch means several weeks of zero orders later. Upstream sees a burst, then silence: lumpy demand they have to guess around."},
+   {big:"60",text:"Take the deal. Order 60",grade:"wrong",amp:2.1,why:"One giant order followed by six weeks of nothing. The distributor and factory see a 600% spike, then a crash. That's the bullwhip in one click."}],
+  rule:"<b>Order batching:</b> big, infrequent orders look like wild demand swings to everyone upstream. Order little and often."},
+ {topic:"Shortage gaming",title:"Rationing!",
+  scene:[["Sold this week",10],["On your shelf",18],["Arriving next week",10]],
+  story:"The wholesaler announces a shortage: <b>“We can only fill 50% of every order this month.”</b> Your shelf is fine for now.",
+  opts:[
+   {big:"10",text:"Order your real need, 10, and tell them your true sales",grade:"right",amp:1.1,why:"Honest orders let the wholesaler see real demand and allocate fairly. The shortage clears faster when nobody inflates."},
+   {big:"20",text:"Order 20 so that 50% gives you the 10 you need",grade:"meh",amp:1.5,why:"Smart for you, bad for the chain. If every store does this, demand looks doubled, the factory overproduces, and everyone cancels later."},
+   {big:"50",text:"Order 50 and grab as much as you can",grade:"wrong",amp:2.1,why:"Phantom orders. The chain now sees 5× demand that doesn't exist. When supply returns, orders get cancelled and the factory is left with a mountain of stock."}],
+  rule:"<b>Shortage gaming:</b> inflating orders to beat rationing creates fake demand. When it's cancelled, the whip cracks the other way."},
+ {topic:"Mitigation",title:"Fix the chain",
+  scene:[["Sold this week",10],["On your shelf",20],["Arriving next week",10]],
+  story:"Head office asks: <b>what one change would stop the bullwhip for good?</b> Pick the fix.",
+  opts:[
+   {big:"📡",text:"Share your real daily sales data with the wholesaler and factory",grade:"right",amp:1.0,why:"When every stage sees true customer demand, nobody has to guess from distorted orders. This is the single biggest bullwhip fix."},
+   {big:"📦",text:"Keep a bigger safety stock in your back room",grade:"meh",amp:1.4,why:"Extra stock hides the symptom for your store but costs money, and the stages above still only see your orders, not real demand."},
+   {big:"🏷️",text:"Run big monthly sales to move more product",grade:"wrong",amp:2.0,why:"Promotions make customers forward-buy: a spike, then a dead month. Price swings are a classic cause of the bullwhip, not a cure."}],
+  rule:"<b>Mitigation:</b> share point-of-sale data, shorten lead times, order small and steady, and keep prices stable."}
+];
+const PTS={right:20,meh:10,wrong:0};
+const TIERS=[["Your order","var(--c-you)"],["Wholesaler","var(--c-whl)"],["Distributor","var(--c-dis)"],["Factory","var(--c-fac)"]];
+
+$("login-form").addEventListener("submit",e=>{
+  e.preventDefault();
+  const f={user:$("f-user"),first:$("f-first"),last:$("f-last")},miss=[];
+  for(const k in f){const v=f[k].value.trim();f[k].classList.toggle("bad",!v);if(!v)miss.push(k==="user"?"username":k+" name");}
+  if(miss.length){$("login-err").textContent="Please enter your "+miss.join(", ")+".";return;}
+  $("login-err").textContent="";
+  G.user={username:f.user.value.trim(),first:f.first.value.trim(),last:f.last.value.trim()};
+  show("intro");
+});
+$("btn-play").addEventListener("click",()=>{G.round=0;G.gameScore=0;G.results=[];renderRound();show("round");});
+
+function renderRound(){
+  const r=ROUNDS[G.round];
+  $("r-n").textContent=G.round+1;$("r-topic").textContent=r.topic;$("r-title").textContent=r.title;
+  $("r-score").textContent=G.gameScore+" pts";
+  [...$("r-dots").children].forEach((d,i)=>{d.className=i<G.results.length?G.results[i].grade.replace("wrong","badd"):(i===G.round?"on":"");});
+  $("r-scene").innerHTML=r.scene.map(s=>`<div><span class="k">${s[0]}</span><span class="v num">${s[1]}</span></div>`).join("");
+  $("r-story").innerHTML=r.story;
+  $("r-opts").innerHTML=r.opts.map((o,i)=>`<button class="opt" data-i="${i}"><span class="big">${o.big}</span><span>${o.text}</span></button>`).join("");
+  $("r-opts").querySelectorAll(".opt").forEach(b=>b.addEventListener("click",()=>pick(+b.dataset.i)));
+  $("r-result").hidden=true;
+}
+function pick(i){
+  const r=ROUNDS[G.round],o=r.opts[i];
+  G.results.push({grade:o.grade,pts:PTS[o.grade]});G.gameScore+=PTS[o.grade];
+  $("r-opts").querySelectorAll(".opt").forEach((b,k)=>{b.disabled=true;if(k===i)b.classList.add(o.grade);});
+  $("r-score").textContent=G.gameScore+" pts";
+  [...$("r-dots").children][G.round].className=o.grade.replace("wrong","badd");
+  // whip animation: your order ripples upstream
+  const base=parseInt(o.big)||10;
+  const vals=[base,Math.round(base*o.amp),Math.round(base*o.amp*o.amp),Math.round(base*o.amp*o.amp*o.amp)];
+  const mx=Math.max(...vals,12);
+  $("r-whip").innerHTML=TIERS.map((t,k)=>`<div class="t"><span class="n num" style="color:${t[1]}">${k===0?vals[0]:"–"}</span><div class="b" id="wb${k}" style="height:8%;background:${t[1]}"></div><span class="l">${t[0]}</span></div>`).join("");
+  $("r-result").hidden=false;
+  vals.forEach((v,k)=>setTimeout(()=>{$("wb"+k).style.height=Math.max(8,v/mx*100)+"%";$("r-whip").querySelectorAll(".n")[k].textContent=v;},150+k*350));
+  const vd=$("r-verdict");vd.className="verdict "+o.grade;
+  vd.innerHTML=`<div class="row spread"><h3>${o.grade==="right"?"Nice. Smooth order.":o.grade==="meh"?"Hmm. The whip wobbles.":"Crack! You whipped the chain."}</h3><span class="pts">+${PTS[o.grade]}</span></div><p>${o.why} ${o.grade!=="right"?`The factory ends up making <b>${vals[3]}</b> for a store that sells 10.`:`The factory makes about <b>${vals[3]}</b>, right in line with real demand.`}</p>`;
+  $("r-rule").innerHTML=r.rule;
+  $("r-next").textContent=G.round===ROUNDS.length-1?"Extra credit quiz":"Next round";
+}
+$("r-next").addEventListener("click",()=>{if(G.round<ROUNDS.length-1){G.round++;renderRound();}else{G.quiz={i:0,correct:0,done:false};renderQuiz();show("quiz");}});
+
+/* ---- Extra credit quiz: 5 questions, 1 point each ---- */
+const QUIZ=[
+ {q:"In the bullwhip effect, where are order swings the biggest?",o:["At the store, closest to customers","At the factory, furthest from customers","The same everywhere"],a:1,e:"Swings grow at every step upstream, so the factory sees the wildest orders."},
+ {q:"Your delivery is one week late. The smart move is to:",o:["Double your order to be safe","Order your normal amount; the late stock is still coming","Order nothing until it arrives"],a:1,e:"Stock in the pipeline still counts. Doubling creates a fake demand spike upstream."},
+ {q:"Which of these CAUSES the bullwhip effect?",o:["Ordering in big, rare batches","Sharing real sales data with suppliers","Shorter delivery times"],a:0,e:"Batching, shortage gaming, price promotions, and forecasting from orders are the classic causes. The other two are fixes."},
+ {q:"A supplier is rationing. Inflating your order to get your share is called:",o:["Safety stock","Shortage gaming","Lead time"],a:1,e:"Shortage gaming creates phantom demand that gets cancelled later, whipping the chain the other way."},
+ {q:"The best single fix for the bullwhip effect is to:",o:["Run bigger sales promotions","Let every stage see real customer demand","Keep orders secret from suppliers"],a:1,e:"Information sharing (point-of-sale data, collaborative forecasting) removes the guessing that amplifies orders."}
+];
+function renderQuiz(){
+  const k=G.quiz.i,q=QUIZ[k];G.quiz.done=false;
+  $("q-n").textContent=k+1;$("q-score").textContent="+"+G.quiz.correct;
+  [...$("q-dots").children].forEach((d,i)=>d.className=i<k?"good":(i===k?"on":""));
+  $("q-text").textContent=q.q;$("q-explain").hidden=true;$("q-next").disabled=true;$("q-next").textContent=k===QUIZ.length-1?"See my score":"Next";
+  $("q-opts").innerHTML=q.o.map((t,i)=>`<button class="opt" data-i="${i}"><span class="big">${"ABC"[i]}</span><span>${t}</span></button>`).join("");
+  $("q-opts").querySelectorAll(".opt").forEach(b=>b.addEventListener("click",()=>answer(+b.dataset.i)));
+}
+function answer(i){
+  if(G.quiz.done)return;G.quiz.done=true;const q=QUIZ[G.quiz.i],ok=i===q.a;if(ok)G.quiz.correct++;
+  $("q-opts").querySelectorAll(".opt").forEach((b,k)=>{b.disabled=true;if(k===q.a)b.classList.add("right");else if(k===i)b.classList.add("wrong");});
+  $("q-explain").innerHTML=`<b style="color:${ok?"var(--good)":"var(--bad)"}">${ok?"+1 point.":"No point."}</b> ${q.e}`;$("q-explain").hidden=false;
+  $("q-score").textContent="+"+G.quiz.correct;$("q-next").disabled=false;
+}
+$("q-next").addEventListener("click",()=>{if(G.quiz.i<QUIZ.length-1){G.quiz.i++;renderQuiz();}else showResults();});
+
+/* ---- Results & CSV ---- */
+function showResults(){
+  const total=G.gameScore+G.quiz.correct;
+  $("res-title").textContent=`${G.user.first}, you scored`;
+  $("res-grade").textContent=total;
+  $("res-game").textContent=G.gameScore;$("res-quiz").textContent="+"+G.quiz.correct;$("res-total").textContent=total;
+  const rights=G.results.filter(r=>r.grade==="right").length;
+  $("res-msg").innerHTML=rights===5?"Perfect run. You kept the whip flat: steady orders, honest numbers, shared data.":rights>=3?`You made ${rights} smooth calls out of 5. Remember: react slowly, count what's already coming, and order little and often.`:"The factory felt every one of your orders. Next time: don't chase one-week spikes, count stock on the way, skip bulk deals, and never inflate orders.";
+  $("csv-fallback").hidden=true;show("result");
+}
+function esc(v){v=String(v);return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+function buildCSV(){
+  const rows=[["Username","First Name","Last Name","Game Score","Extra Credit","Final Score","Date"],[G.user.username,G.user.first,G.user.last,G.gameScore,G.quiz.correct,G.gameScore+G.quiz.correct,new Date().toISOString().slice(0,10)]];
+  return "﻿"+rows.map(r=>r.map(esc).join(",")).join("\r\n")+"\r\n";
+}
+$("btn-csv").addEventListener("click",async()=>{
+  const csv=buildCSV(),fname=`bullwhip_${G.user.username.replace(/[^\w-]+/g,"_")}.csv`;
+  let dl=null;try{dl=await window.claude?.use?.("downloads");}catch(e){dl=null;}
+  if(!dl){ // standalone browser: direct download
+    try{const b=new Blob([csv],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=fname;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);toast("CSV downloaded");}
+    catch(e){$("csv-text").value=csv.replace("﻿","");$("csv-fallback").hidden=false;}
+    return;}
+  try{await dl.save({filename:fname,data:csv});toast("CSV saved");}
+  catch(err){if(err&&err.code==="declined")toast("Download cancelled");else{$("csv-text").value=csv.replace("﻿","");$("csv-fallback").hidden=false;}}
+});
+$("btn-copy").addEventListener("click",async()=>{const t=$("csv-text").value;try{await navigator.clipboard.writeText(t);toast("Copied");}catch(e){$("csv-text").focus();$("csv-text").select();toast("Select the text and copy it");}});
+$("btn-again").addEventListener("click",()=>{G.round=0;G.gameScore=0;G.results=[];renderRound();show("round");});
+
+function start(data){if(data&&data.user&&data.user.username){G.user=data.user;$("f-user").value=G.user.username;$("f-first").value=G.user.first||"";$("f-last").value=G.user.last||"";}show("login");}
+try{window.claude?.hot?.snapshot?.(()=>({user:G.user}));}catch(e){}
+window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
+</script>
+</body>
+</html>
