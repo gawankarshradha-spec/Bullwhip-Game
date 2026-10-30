@@ -101,15 +101,37 @@ textarea{font:14px/1.4 ui-monospace,Menlo,Consolas,monospace;width:100%;border:1
 @keyframes wave{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.35)}}
 .demo .b{transform-origin:bottom;animation:wave 1.6s ease-in-out infinite}
 .demo .t:nth-child(2) .b{animation-delay:.2s}.demo .t:nth-child(3) .b{animation-delay:.4s}.demo .t:nth-child(4) .b{animation-delay:.6s}
+
+/* Course banner + probability card */
+.banner{max-width:580px;margin:0 auto 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.banner .course{font-family:var(--display);font-weight:800;font-size:clamp(20px,5vw,26px);letter-spacing:.02em;text-transform:uppercase}
+.banner .prof{font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:3px 12px}
+.prob{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:420px){.prob{grid-template-columns:1fr}}
+.pc{background:var(--panel2);border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.pc .pv{font-family:var(--display);font-size:34px;font-weight:800;line-height:1;color:var(--accent)}
+.pc .pk{font-size:13px;color:var(--muted)}
+.pc .pf{font-size:14px;font-weight:600}
+.coin{width:64px;height:64px;border-radius:50%;background:var(--warn);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:24px;color:#3a2a00;animation:flip 2.4s ease-in-out infinite;border:3px solid color-mix(in srgb,var(--warn) 60%,#000)}
+@keyframes flip{0%,100%{transform:rotateY(0)}50%{transform:rotateY(180deg)}}
+.pcard{width:46px;height:64px;border-radius:7px;background:#fff;border:2px solid #c9d2dc;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:22px;color:#c93b3b;animation:deal 2.4s ease-in-out infinite;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+@keyframes deal{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-6px) rotate(6deg)}}
+.die{width:60px;height:60px;border-radius:12px;background:#fff;border:2px solid #c9d2dc;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:8px;gap:2px;animation:roll 2.4s ease-in-out infinite;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.die i{display:block;width:10px;height:10px;border-radius:50%;background:#182130;place-self:center}
+@keyframes roll{0%,100%{transform:rotate(0)}50%{transform:rotate(90deg)}}
+.formula{background:var(--panel2);border-radius:10px;padding:10px 14px;font-family:var(--display);font-size:20px;font-weight:700;text-align:center}
+.formula span{color:var(--accent)}
 @media (prefers-reduced-motion: reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
 
+<header class="banner"><span class="course">Theory of Probability</span><span class="prof">Prof S</span></header>
+
 <!-- LOGIN -->
 <section id="s-login" class="card">
   <div class="row"><div class="logo"><svg viewBox="0 0 28 28" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20c4-1 5-8 9-8s4 10 8 10 3-14 5-14"/></svg></div><div><p class="eyebrow">Supply chain game</p><h1>Bullwhip Run</h1></div></div>
-  <p class="story">You run a store. Five quick decisions. Don't crack the whip.</p>
+  <p class="story">A quick lesson in probability, then you run a store. Five decisions. Don't crack the whip.</p>
   <form id="login-form" novalidate style="display:flex;flex-direction:column;gap:10px">
     <label>Username <input type="text" id="f-user" autocomplete="username" maxlength="40"></label>
     <label>First name <input type="text" id="f-first" autocomplete="given-name" maxlength="40"></label>
@@ -117,6 +139,21 @@ textarea{font:14px/1.4 ui-monospace,Menlo,Consolas,monospace;width:100%;border:1
     <div class="err" id="login-err" aria-live="polite"></div>
     <button class="primary" type="submit">Let's go</button>
   </form>
+</section>
+
+<!-- PROBABILITY BASICS -->
+<section id="s-prob" class="card" hidden>
+  <p class="eyebrow">First, the basics</p>
+  <h2>What is probability?</h2>
+  <p class="story">Probability is <b>how likely</b> something is to happen, from 0 (never) to 1 (always). We usually say it as a percent.</p>
+  <div class="formula">Probability = <span>ways it can happen</span> ÷ <span>all possible outcomes</span></div>
+  <div class="prob">
+    <div class="pc"><div class="coin">H</div><span class="pv">50%</span><span class="pf">Heads on a coin flip</span><span class="pk">1 way out of 2 outcomes = 1/2</span></div>
+    <div class="pc"><div class="pcard">A♥</div><span class="pv">25%</span><span class="pf">Drawing a heart</span><span class="pk">13 hearts out of 52 cards = 1/4<br>(one exact card: 1/52 ≈ 2%)</span></div>
+    <div class="pc"><div class="die"><i></i><i style="visibility:hidden"></i><i></i><i style="visibility:hidden"></i><i></i><i style="visibility:hidden"></i><i></i><i style="visibility:hidden"></i><i></i></div><span class="pv">17%</span><span class="pf">Rolling a 5 on a die</span><span class="pk">1 way out of 6 outcomes = 1/6</span></div>
+  </div>
+  <div class="rule"><b>Why it matters here:</b> customer demand is random, like a dice roll. If you usually sell 10 drinks and one week you sell 16, that's a lucky roll, not a new normal. A single rare outcome tells you very little. Over many weeks, results settle around the average. Managers who forget this overreact to one week and crack the whip.</div>
+  <button class="primary" id="btn-prob-next">Got it</button>
 </section>
 
 <!-- INTRO -->
@@ -181,7 +218,7 @@ textarea{font:14px/1.4 ui-monospace,Menlo,Consolas,monospace;width:100%;border:1
 <script>
 const $=id=>document.getElementById(id);
 const G={user:{},round:0,gameScore:0,results:[],quiz:{i:0,correct:0,done:false}};
-function show(name){for(const s of["login","intro","round","quiz","result"])$("s-"+s).hidden=s!==name;window.scrollTo({top:0});}
+function show(name){for(const s of["login","prob","intro","round","quiz","result"])$("s-"+s).hidden=s!==name;window.scrollTo({top:0});}
 function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2200);}
 
 /* ---- Rounds: each one is a concept the student applies ---- */
@@ -238,8 +275,9 @@ $("login-form").addEventListener("submit",e=>{
   if(miss.length){$("login-err").textContent="Please enter your "+miss.join(", ")+".";return;}
   $("login-err").textContent="";
   G.user={username:f.user.value.trim(),first:f.first.value.trim(),last:f.last.value.trim()};
-  show("intro");
+  show("prob");
 });
+$("btn-prob-next").addEventListener("click",()=>show("intro"));
 $("btn-play").addEventListener("click",()=>{G.round=0;G.gameScore=0;G.results=[];renderRound();show("round");});
 
 function renderRound(){
